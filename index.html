@@ -3,75 +3,49 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<title>A Widow's Son</title>
+<title>A Widow’s Son — AR</title>
 <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 <style>
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font-family:Arial,Helvetica,sans-serif}
+
 /* ---------- Landing page ---------- */
 #landing{
-  position:fixed;inset:0;z-index:50;
-  display:flex;justify-content:center;
-  background:#000;color:#fff;
-  overflow:hidden;
+  position:fixed;inset:0;z-index:50;display:flex;justify-content:center;
+  background:#000;color:#fff;overflow:hidden;
   padding:clamp(32px,6vh,72px) 22px calc(32px + env(safe-area-inset-bottom));
+  box-sizing:border-box;
 }
-#landingCopy{
-  width:min(100%,780px);height:100%;
-  display:flex;flex-direction:column;align-items:center;text-align:center;
-}
-.landingTitle{
-  margin:0;
-  font-family:Georgia,'Times New Roman',serif;font-weight:400;
-  font-size:clamp(36px,5.5vw,62px);line-height:1;
-  letter-spacing:-.03em;
-}
-#landingImageWrap{
-  width:min(78vw,400px);
-  margin-top:clamp(28px,5vh,56px);
-  flex:0 0 auto;
-}
-#landingImage{
-  display:block;width:100%;height:auto;
-}
-.landingInstruction{
-  margin:clamp(30px,5vh,50px) auto 0;
-  max-width:600px;
-  font-family:Georgia,'Times New Roman',serif;font-weight:400;
-  font-size:clamp(18px,2.4vw,25px);
-  line-height:1.25;
-  letter-spacing:-.01em;
-}
-#enterAR{
-  appearance:none;
-  border:1px solid rgba(255,255,255,.8);
-  background:transparent;color:#fff;
-  min-width:150px;
-  padding:14px 28px;
-  margin-top:clamp(26px,4vh,40px);
-  font:400 12px/1 Arial,Helvetica,sans-serif;
-  letter-spacing:.22em;text-transform:uppercase;
-  cursor:pointer;
-  transition:background .2s ease,color .2s ease,transform .15s ease;
-}
-#enterAR:hover{background:#fff;color:#000}
-#enterAR:active{transform:translateY(1px)}
-#enterAR:disabled{opacity:.6;cursor:wait}
+#landingCopy{width:min(100%,780px);height:100%;display:flex;flex-direction:column;align-items:center;text-align:center}
+.landingTitle{margin:0;font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:clamp(36px,5.5vw,62px);line-height:1;letter-spacing:-.03em}
+#landingImageWrap{width:min(78vw,400px);margin-top:clamp(28px,5vh,56px);flex:0 0 auto}
+#landingImage{display:block;width:100%;height:auto}
+.landingInstruction{margin:clamp(30px,5vh,50px) auto 0;max-width:600px;font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:clamp(18px,2.4vw,25px);line-height:1.25;letter-spacing:-.01em}
+#enterAR{appearance:none;border:1px solid rgba(255,255,255,.8);background:transparent;color:#fff;min-width:150px;padding:14px 28px;margin-top:clamp(26px,4vh,40px);font:400 12px/1 Arial,Helvetica,sans-serif;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;transition:background .2s ease,color .2s ease,transform .15s ease}
+#enterAR:hover{background:#fff;color:#000}#enterAR:active{transform:translateY(1px)}#enterAR:disabled{opacity:.6;cursor:wait}
 @media (max-width:760px){
   #landing{padding-left:18px;padding-right:18px}
   #landingImageWrap{width:min(76vw,340px);margin-top:25px}
   .landingInstruction{margin-top:27px;font-size:20px;max-width:360px}
   #enterAR{margin-top:25px}
 }
-/* MindAR controls the camera-video geometry. Do not force width/height/object-fit here. */
-video.mindar-video,video[autoplay]{z-index:0!important;pointer-events:none!important}
-a-scene{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;z-index:1!important}
+
+/* ---------- AR stage ---------- */
+#arStage{position:fixed;inset:0;overflow:hidden;z-index:1;background:#000}
+#arStage video{position:absolute!important;pointer-events:none!important;z-index:0!important}
+#scene{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;z-index:1!important}
 canvas.a-canvas{background:transparent!important;pointer-events:none!important}
-#start{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:#111;color:#fff;text-align:center;padding:28px;box-sizing:border-box}
-#start .box{max-width:340px}button{border:0;background:#fff;color:#111;padding:15px 24px;font-size:16px;margin-top:14px;cursor:pointer}button:disabled{opacity:.6}
-#status{position:fixed;left:0;right:0;bottom:18px;z-index:15;color:#fff;text-align:center;font:14px Arial;text-shadow:0 1px 5px #000;pointer-events:none}
-#debug{display:none;position:fixed;top:12px;left:12px;right:12px;z-index:30;background:rgba(0,0,0,.78);color:#fff;padding:12px;font:12px Arial;border-radius:6px;box-sizing:border-box}
-#debug input{width:100%}body.debug #debug{display:block}
+
+#start{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:#111;color:#fff;text-align:center;padding:28px;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
+#start .box{max-width:340px}
+#startButton{border:0;background:#fff;color:#111;padding:15px 24px;font-size:16px;margin-top:14px;cursor:pointer}
+#startButton:disabled{opacity:.6}
+#status{position:fixed;left:0;right:0;bottom:18px;z-index:15;color:#fff;text-align:center;font:14px Arial,sans-serif;text-shadow:0 1px 5px #000;pointer-events:none}
+
+#debug{display:none;position:fixed;top:12px;left:12px;right:12px;z-index:30;background:rgba(0,0,0,.80);color:#fff;padding:12px;font:12px Arial,sans-serif;border-radius:6px;box-sizing:border-box;backdrop-filter:blur(4px)}
+#debug input[type=range]{width:100%}
+#debug label{display:block;margin-top:9px}
+body.debug #debug{display:block}
 </style>
 </head>
 <body>
@@ -81,65 +55,92 @@ canvas.a-canvas{background:transparent!important;pointer-events:none!important}
     <div id="landingImageWrap">
       <img id="landingImage" src="./assets/landing.png" alt="Artwork from A Widow’s Son">
     </div>
-    <p class="landingInstruction">Point your camera at the physical work to reveal its solution.</p>
+    <p class="landingInstruction">Point your camera at the artwork to reveal what is hidden.</p>
     <button id="enterAR">Enter</button>
   </div>
 </section>
 
+<div id="arStage">
+  <a-scene id="scene" embedded
+    mindar-image="imageTargetSrc:./targets/targets.mind;autoStart:false;uiLoading:no;uiError:no;uiScanning:no;maxTrack:1;warmupTolerance:6;missTolerance:3;filterMinCF:0.0005;filterBeta:1000;"
+    renderer="alpha:true;antialias:true;colorManagement:true;physicallyCorrectLights:false"
+    vr-mode-ui="enabled:false" device-orientation-permission-ui="enabled:false">
+
+    <a-assets>
+      <img id="letters01" src="./assets/letters/work-01-letters.png">
+      <img id="letters02" src="./assets/letters/work-02-letters.png">
+      <img id="letters03" src="./assets/letters/work-03-letters.png">
+      <img id="letters04" src="./assets/letters/work-04-letters.png">
+      <img id="letters05" src="./assets/letters/work-05-letters.png">
+      <img id="letters06" src="./assets/letters/work-06-letters.png">
+      <img id="letters07" src="./assets/letters/work-07-letters.png">
+      <img id="letters08" src="./assets/letters/work-08-letters.png">
+
+      <img id="ref01" src="./assets/targets/work-01.jpg">
+      <img id="ref02" src="./assets/targets/work-02.jpg">
+      <img id="ref03" src="./assets/targets/work-03.jpg">
+      <img id="ref04" src="./assets/targets/work-04.jpg">
+      <img id="ref05" src="./assets/targets/work-05.jpg">
+      <img id="ref06" src="./assets/targets/work-06.jpg">
+      <img id="ref07" src="./assets/targets/work-07.jpg">
+      <img id="ref08" src="./assets/targets/work-08.jpg">
+    </a-assets>
+
+    <a-camera position="0 0 0" look-controls="enabled:false"></a-camera>
+
+    <!-- The supplied targets.mind is reverse-ordered: 0→08, 1→07, ... 7→01. -->
+    <a-entity class="target" data-index="0" data-work="08" mindar-image-target="targetIndex:0">
+      <a-plane class="reference" width="1" height="1" position="0 0 -0.002" rotation="0 0 0"></a-plane>
+      <a-plane class="solution" width="1" height="1" position="0 0 0" rotation="0 0 0" material="shader:flat;transparent:true;alphaTest:0.001;depthWrite:false;opacity:1"></a-plane>
+      <a-plane class="debug-border" width="1" height="1" position="0 0 0.001" material="shader:flat;wireframe:true;wireframeLinewidth:2;color:#ffffff;transparent:true;opacity:0"></a-plane>
+    </a-entity>
+    <a-entity class="target" data-index="1" data-work="07" mindar-image-target="targetIndex:1">
+      <a-plane class="reference" width="1" height="1" position="0 0 -0.002" rotation="0 0 0"></a-plane>
+      <a-plane class="solution" width="1" height="1" position="0 0 0" rotation="0 0 0" material="shader:flat;transparent:true;alphaTest:0.001;depthWrite:false;opacity:1"></a-plane>
+      <a-plane class="debug-border" width="1" height="1" position="0 0 0.001" material="shader:flat;wireframe:true;wireframeLinewidth:2;color:#ffffff;transparent:true;opacity:0"></a-plane>
+    </a-entity>
+    <a-entity class="target" data-index="2" data-work="06" mindar-image-target="targetIndex:2">
+      <a-plane class="reference" width="1" height="1" position="0 0 -0.002" rotation="0 0 0"></a-plane>
+      <a-plane class="solution" width="1" height="1" position="0 0 0" rotation="0 0 0" material="shader:flat;transparent:true;alphaTest:0.001;depthWrite:false;opacity:1"></a-plane>
+      <a-plane class="debug-border" width="1" height="1" position="0 0 0.001" material="shader:flat;wireframe:true;wireframeLinewidth:2;color:#ffffff;transparent:true;opacity:0"></a-plane>
+    </a-entity>
+    <a-entity class="target" data-index="3" data-work="05" mindar-image-target="targetIndex:3">
+      <a-plane class="reference" width="1" height="1" position="0 0 -0.002" rotation="0 0 0"></a-plane>
+      <a-plane class="solution" width="1" height="1" position="0 0 0" rotation="0 0 0" material="shader:flat;transparent:true;alphaTest:0.001;depthWrite:false;opacity:1"></a-plane>
+      <a-plane class="debug-border" width="1" height="1" position="0 0 0.001" material="shader:flat;wireframe:true;wireframeLinewidth:2;color:#ffffff;transparent:true;opacity:0"></a-plane>
+    </a-entity>
+    <a-entity class="target" data-index="4" data-work="04" mindar-image-target="targetIndex:4">
+      <a-plane class="reference" width="1" height="1" position="0 0 -0.002" rotation="0 0 0"></a-plane>
+      <a-plane class="solution" width="1" height="1" position="0 0 0" rotation="0 0 0" material="shader:flat;transparent:true;alphaTest:0.001;depthWrite:false;opacity:1"></a-plane>
+      <a-plane class="debug-border" width="1" height="1" position="0 0 0.001" material="shader:flat;wireframe:true;wireframeLinewidth:2;color:#ffffff;transparent:true;opacity:0"></a-plane>
+    </a-entity>
+    <a-entity class="target" data-index="5" data-work="03" mindar-image-target="targetIndex:5">
+      <a-plane class="reference" width="1" height="1" position="0 0 -0.002" rotation="0 0 0"></a-plane>
+      <a-plane class="solution" width="1" height="1" position="0 0 0" rotation="0 0 0" material="shader:flat;transparent:true;alphaTest:0.001;depthWrite:false;opacity:1"></a-plane>
+      <a-plane class="debug-border" width="1" height="1" position="0 0 0.001" material="shader:flat;wireframe:true;wireframeLinewidth:2;color:#ffffff;transparent:true;opacity:0"></a-plane>
+    </a-entity>
+    <a-entity class="target" data-index="6" data-work="02" mindar-image-target="targetIndex:6">
+      <a-plane class="reference" width="1" height="1" position="0 0 -0.002" rotation="0 0 0"></a-plane>
+      <a-plane class="solution" width="1" height="1" position="0 0 0" rotation="0 0 0" material="shader:flat;transparent:true;alphaTest:0.001;depthWrite:false;opacity:1"></a-plane>
+      <a-plane class="debug-border" width="1" height="1" position="0 0 0.001" material="shader:flat;wireframe:true;wireframeLinewidth:2;color:#ffffff;transparent:true;opacity:0"></a-plane>
+    </a-entity>
+    <a-entity class="target" data-index="7" data-work="01" mindar-image-target="targetIndex:7">
+      <a-plane class="reference" width="1" height="1" position="0 0 -0.002" rotation="0 0 0"></a-plane>
+      <a-plane class="solution" width="1" height="1" position="0 0 0" rotation="0 0 0" material="shader:flat;transparent:true;alphaTest:0.001;depthWrite:false;opacity:1"></a-plane>
+      <a-plane class="debug-border" width="1" height="1" position="0 0 0.001" material="shader:flat;wireframe:true;wireframeLinewidth:2;color:#ffffff;transparent:true;opacity:0"></a-plane>
+    </a-entity>
+  </a-scene>
+</div>
+
 <div id="start"><div class="box"><div style="font-size:22px;margin-bottom:10px">Camera access</div><div>Allow camera access, then point your phone at one of the physical works.</div><button id="startButton">START CAMERA</button></div></div>
 <div id="status">Ready.</div>
-<div id="debug"><div id="debugName">No target</div><div style="margin-top:5px;opacity:.8">White square = exact AR target boundary.</div><label style="display:block;margin-top:9px">Overlay opacity <input id="opacity" type="range" min="0" max="1" step="0.01" value="1"></label></div>
-
-<a-scene id="scene" embedded
- mindar-image="imageTargetSrc:./targets/targets.mind;autoStart:false;uiLoading:no;uiError:no;uiScanning:no;maxTrack:1;warmupTolerance:8;missTolerance:8;filterMinCF:0.001;filterBeta:1000;"
- renderer="alpha:true;antialias:true;colorManagement:true"
- vr-mode-ui="enabled:false" device-orientation-permission-ui="enabled:false">
- <a-assets>
-  <img id="sol01" src="./assets/solutions/work-01-solution.png">
-  <img id="sol02" src="./assets/solutions/work-02-solution.png">
-  <img id="sol03" src="./assets/solutions/work-03-solution.png">
-  <img id="sol04" src="./assets/solutions/work-04-solution.png">
-  <img id="sol05" src="./assets/solutions/work-05-solution.png">
-  <img id="sol06" src="./assets/solutions/work-06-solution.png">
-  <img id="sol07" src="./assets/solutions/work-07-solution.png">
-  <img id="sol08" src="./assets/solutions/work-08-solution.png">
- </a-assets>
- <a-camera position="0 0 0" look-controls="enabled:false"></a-camera>
-
- <!-- The supplied targets.mind is reverse-ordered: 0→08, 1→07, ... 7→01. -->
- <a-entity class="target" data-index="0" data-work="08" mindar-image-target="targetIndex:0">
-  <a-plane class="solution" src="#sol08" width="1" height="1" position="0 0 0" rotation="0 0 0" material="shader:flat;transparent:true;alphaTest:0.01;depthWrite:false;opacity:1"></a-plane>
-  <a-plane class="debug-border" width="1" height="1" position="0 0 0.001" material="shader:flat;wireframe:true;wireframeLinewidth:2;color:#ffffff;transparent:true;opacity:0"></a-plane>
- </a-entity>
- <a-entity class="target" data-index="1" data-work="07" mindar-image-target="targetIndex:1">
-  <a-plane class="solution" src="#sol07" width="1" height="1" position="0 0 0" rotation="0 0 0" material="shader:flat;transparent:true;alphaTest:0.01;depthWrite:false;opacity:1"></a-plane>
-  <a-plane class="debug-border" width="1" height="1" position="0 0 0.001" material="shader:flat;wireframe:true;wireframeLinewidth:2;color:#ffffff;transparent:true;opacity:0"></a-plane>
- </a-entity>
- <a-entity class="target" data-index="2" data-work="06" mindar-image-target="targetIndex:2">
-  <a-plane class="solution" src="#sol06" width="1" height="1" position="0 0 0" rotation="0 0 0" material="shader:flat;transparent:true;alphaTest:0.01;depthWrite:false;opacity:1"></a-plane>
-  <a-plane class="debug-border" width="1" height="1" position="0 0 0.001" material="shader:flat;wireframe:true;wireframeLinewidth:2;color:#ffffff;transparent:true;opacity:0"></a-plane>
- </a-entity>
- <a-entity class="target" data-index="3" data-work="05" mindar-image-target="targetIndex:3">
-  <a-plane class="solution" src="#sol05" width="1" height="1" position="0 0 0" rotation="0 0 0" material="shader:flat;transparent:true;alphaTest:0.01;depthWrite:false;opacity:1"></a-plane>
-  <a-plane class="debug-border" width="1" height="1" position="0 0 0.001" material="shader:flat;wireframe:true;wireframeLinewidth:2;color:#ffffff;transparent:true;opacity:0"></a-plane>
- </a-entity>
- <a-entity class="target" data-index="4" data-work="04" mindar-image-target="targetIndex:4">
-  <a-plane class="solution" src="#sol04" width="1" height="1" position="0 0 0" rotation="0 0 0" material="shader:flat;transparent:true;alphaTest:0.01;depthWrite:false;opacity:1"></a-plane>
-  <a-plane class="debug-border" width="1" height="1" position="0 0 0.001" material="shader:flat;wireframe:true;wireframeLinewidth:2;color:#ffffff;transparent:true;opacity:0"></a-plane>
- </a-entity>
- <a-entity class="target" data-index="5" data-work="03" mindar-image-target="targetIndex:5">
-  <a-plane class="solution" src="#sol03" width="1" height="1" position="0 0 0" rotation="0 0 0" material="shader:flat;transparent:true;alphaTest:0.01;depthWrite:false;opacity:1"></a-plane>
-  <a-plane class="debug-border" width="1" height="1" position="0 0 0.001" material="shader:flat;wireframe:true;wireframeLinewidth:2;color:#ffffff;transparent:true;opacity:0"></a-plane>
- </a-entity>
- <a-entity class="target" data-index="6" data-work="02" mindar-image-target="targetIndex:6">
-  <a-plane class="solution" src="#sol02" width="1" height="1" position="0 0 0" rotation="0 0 0" material="shader:flat;transparent:true;alphaTest:0.01;depthWrite:false;opacity:1"></a-plane>
-  <a-plane class="debug-border" width="1" height="1" position="0 0 0.001" material="shader:flat;wireframe:true;wireframeLinewidth:2;color:#ffffff;transparent:true;opacity:0"></a-plane>
- </a-entity>
- <a-entity class="target" data-index="7" data-work="01" mindar-image-target="targetIndex:7">
-  <a-plane class="solution" src="#sol01" width="1" height="1" position="0 0 0" rotation="0 0 0" material="shader:flat;transparent:true;alphaTest:0.01;depthWrite:false;opacity:1"></a-plane>
-  <a-plane class="debug-border" width="1" height="1" position="0 0 0.001" material="shader:flat;wireframe:true;wireframeLinewidth:2;color:#ffffff;transparent:true;opacity:0"></a-plane>
- </a-entity>
-</a-scene>
+<div id="debug">
+  <div id="debugName">No target</div>
+  <div style="margin-top:5px;opacity:.8">White square = exact 1:1 AR target boundary.</div>
+  <label>Letter opacity <input id="opacity" type="range" min="0" max="1" step="0.01" value="1"></label>
+  <label style="display:flex;align-items:center;gap:8px"><input id="referenceToggle" type="checkbox"> Show reference artwork</label>
+  <label style="display:flex;align-items:center;gap:8px"><input id="revealToggle" type="checkbox" checked> Animate reveal</label>
+</div>
 
 <script>
 const scene=document.querySelector('#scene');
@@ -149,23 +150,125 @@ const start=document.querySelector('#start');
 const button=document.querySelector('#startButton');
 const status=document.querySelector('#status');
 const debugName=document.querySelector('#debugName');
-const opacity=document.querySelector('#opacity');
+const opacityControl=document.querySelector('#opacity');
+const referenceToggle=document.querySelector('#referenceToggle');
+const revealToggle=document.querySelector('#revealToggle');
 const targets=[...document.querySelectorAll('.target')];
 const targetToWork=[8,7,6,5,4,3,2,1];
 const debugMode=new URLSearchParams(location.search).get('debug')==='1';
 if(debugMode)document.body.classList.add('debug');
 let activeIndex=-1;
+let assetsReady=false;
 
 function hideAllTargets(){targets.forEach(el=>{el.object3D.visible=false;});}
+
+function waitImage(img){
+  return new Promise(resolve=>{
+    if(img.complete && img.naturalWidth>0){resolve();return;}
+    img.addEventListener('load',resolve,{once:true});
+    img.addEventListener('error',resolve,{once:true});
+  });
+}
+
+function setupPlanes(){
+  targets.forEach((el,i)=>{
+    const work=targetToWork[i];
+    const solutionPlane=el.querySelector('.solution');
+    const referencePlane=el.querySelector('.reference');
+    const letters=document.querySelector('#letters'+String(work).padStart(2,'0'));
+    const ref=document.querySelector('#ref'+String(work).padStart(2,'0'));
+
+    const mesh=solutionPlane.getObject3D('mesh');
+    if(mesh && mesh.material){
+      const canvas=document.createElement('canvas');
+      canvas.width=4500; canvas.height=4500;
+      const texture=new THREE.CanvasTexture(canvas);
+      texture.colorSpace=THREE.SRGBColorSpace;
+      texture.needsUpdate=true;
+      mesh.material.map=texture;
+      mesh.material.transparent=true;
+      mesh.material.alphaTest=0.001;
+      mesh.material.depthWrite=false;
+      mesh.material.needsUpdate=true;
+      el._reveal={canvas,ctx:canvas.getContext('2d'),texture,source:letters,work,cells:[] ,revealed:0,found:false,timer:null,startTime:0};
+    }
+    const rmesh=referencePlane.getObject3D('mesh');
+    if(rmesh && rmesh.material){
+      rmesh.material.map=new THREE.TextureLoader().load(ref.src,()=>{
+        rmesh.material.map.colorSpace=THREE.SRGBColorSpace;
+        rmesh.material.transparent=true;
+        rmesh.material.depthWrite=false;
+        rmesh.material.opacity=debugMode && referenceToggle.checked?0.35:0;
+        rmesh.material.needsUpdate=true;
+      });
+      rmesh.material.transparent=true;
+      rmesh.material.depthWrite=false;
+      rmesh.material.opacity=0;
+    }
+  });
+}
+
+function drawCells(el, upto){
+  const r=el._reveal;
+  if(!r||!r.ctx||!r.source)return;
+  r.ctx.clearRect(0,0,4500,4500);
+  const limit=Math.min(upto,r.cells.length);
+  for(let n=0;n<limit;n++){
+    const [x,y,w,h]=r.cells[n];
+    r.ctx.drawImage(r.source,x,y,w,h,x,y,w,h);
+  }
+  r.texture.needsUpdate=true;
+}
+
+function stopReveal(el, clear=true){
+  const r=el._reveal;
+  if(!r)return;
+  if(r.timer)cancelAnimationFrame(r.timer);
+  r.timer=null;
+  r.startTime=0;
+  if(clear){r.revealed=0;drawCells(el,0);}
+}
+
+function animateReveal(el){
+  const r=el._reveal;
+  if(!r||!r.found)return;
+  if(!revealToggle.checked){drawCells(el,r.cells.length);r.revealed=r.cells.length;return;}
+  stopReveal(el,true);
+  const introDelay=280;
+  const stepMs=42;
+  const total=r.cells.length;
+  const startAt=performance.now()+introDelay;
+  r.startTime=startAt;
+  const tick=(now)=>{
+    if(!r.found)return;
+    if(now<startAt){r.timer=requestAnimationFrame(tick);return;}
+    const next=Math.min(total,Math.floor((now-startAt)/stepMs)+1);
+    if(next!==r.revealed){r.revealed=next;drawCells(el,next)}
+    if(next<total){r.timer=requestAnimationFrame(tick);}
+    else{r.timer=null;status.textContent='The hidden words are complete.';}
+  };
+  r.timer=requestAnimationFrame(tick);
+  status.textContent='Revealing…';
+}
+
 function showTarget(i){
-  targets.forEach((el,idx)=>{el.object3D.visible=idx===i;});
+  targets.forEach((el,idx)=>{
+    const same=idx===i;
+    el.object3D.visible=same;
+    if(!same&&el._reveal){el._reveal.found=false;stopReveal(el,true);}
+  });
   activeIndex=i;
   const work=targetToWork[i];
-  debugName.textContent='MINDAR TARGET '+i+' → WORK '+String(work).padStart(2,'0')+' → SOLUTION '+String(work).padStart(2,'0');
-  status.textContent='Artwork found — solution aligned.';
+  const r=targets[i]._reveal;
+  if(r){r.found=true;animateReveal(targets[i]);}
+  debugName.textContent='MINDAR TARGET '+i+' → WORK '+String(work).padStart(2,'0')+' → LETTERS '+String(work).padStart(2,'0');
+  if(!revealToggle.checked)status.textContent='Artwork found — letters revealed.';
 }
+
 function hideTarget(i){
   if(activeIndex!==i)return;
+  const r=targets[i]._reveal;
+  if(r){r.found=false;stopReveal(targets[i],true);}
   targets[i].object3D.visible=false;
   activeIndex=-1;
   debugName.textContent='No target';
@@ -177,14 +280,47 @@ targets.forEach((el,i)=>{
   el.addEventListener('targetLost',()=>hideTarget(i));
 });
 
-scene.addEventListener('loaded',()=>{hideAllTargets();status.textContent='Ready — tap START CAMERA.';});
-scene.addEventListener('arReady',()=>{start.style.display='none';status.textContent='Camera active — point at a physical work.';});
+scene.addEventListener('loaded',async()=>{
+  const imgs=[...document.querySelectorAll('#scene a-assets img')];
+  await Promise.all(imgs.map(waitImage));
+  setupPlanes();
+  const cellData=await fetch('./assets/letters/cells.json',{cache:'no-store'}).then(r=>r.json());
+  targets.forEach((el,i)=>{
+    const work=targetToWork[i];
+    el._reveal.cells=cellData['work-'+String(work).padStart(2,'0')].cells;
+    drawCells(el,0);
+  });
+  assetsReady=true;
+  hideAllTargets();
+  status.textContent='Ready — tap START CAMERA.';
+});
 
-opacity.addEventListener('input',()=>{
+scene.addEventListener('arReady',()=>{
+  start.style.display='none';
+  status.textContent='Camera active — point at a physical work.';
+});
+
+opacityControl.addEventListener('input',()=>{
   targets.forEach(el=>{
     const plane=el.querySelector('.solution');
-    if(plane)plane.setAttribute('material','shader:flat;transparent:true;alphaTest:0.01;depthWrite:false;opacity:'+opacity.value);
+    if(plane){
+      const m=plane.getObject3D('mesh')?.material;
+      if(m){m.opacity=Number(opacityControl.value);m.needsUpdate=true;}
+    }
   });
+});
+
+referenceToggle.addEventListener('change',()=>{
+  targets.forEach(el=>{
+    const m=el.querySelector('.reference')?.getObject3D('mesh')?.material;
+    if(m){m.opacity=referenceToggle.checked?0.35:0;m.needsUpdate=true;}
+  });
+});
+
+revealToggle.addEventListener('change',()=>{
+  if(activeIndex<0)return;
+  const el=targets[activeIndex];
+  if(el._reveal)animateReveal(el);
 });
 
 enterAR.addEventListener('click',()=>{
