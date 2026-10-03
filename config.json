@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "targetFile": "./targets/targets.mind",
+  "works": [
+    {
+      "id": "work-01",
+      "targetIndex": 7,
+      "target": "./assets/targets/work-01.jpg",
+      "solution": "./assets/solutions/work-01-solution.png"
+    },
+    {
+      "id": "work-02",
+      "targetIndex": 6,
+      "target": "./assets/targets/work-02.jpg",
+      "solution": "./assets/solutions/work-02-solution.png"
+    },
+    {
+      "id": "work-03",
+      "targetIndex": 5,
+      "target": "./assets/targets/work-03.jpg",
+      "solution": "./assets/solutions/work-03-solution.png"
+    },
+    {
+      "id": "work-04",
+      "targetIndex": 4,
+      "target": "./assets/targets/work-04.jpg",
+      "solution": "./assets/solutions/work-04-solution.png"
+    },
+    {
+      "id": "work-05",
+      "targetIndex": 3,
+      "target": "./assets/targets/work-05.jpg",
+      "solution": "./assets/solutions/work-05-solution.png"
+    },
+    {
+      "id": "work-06",
+      "targetIndex": 2,
+      "target": "./assets/targets/work-06.jpg",
+      "solution": "./assets/solutions/work-06-solution.png"
+    },
+    {
+      "id": "work-07",
+      "targetIndex": 1,
+      "target": "./assets/targets/work-07.jpg",
+      "solution": "./assets/solutions/work-07-solution.png"
+    },
+    {
+      "id": "work-08",
+      "targetIndex": 0,
+      "target": "./assets/targets/work-08.jpg",
+      "solution": "./assets/solutions/work-08-solution.png"
+    }
+  ]
+}

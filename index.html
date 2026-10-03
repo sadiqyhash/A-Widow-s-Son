@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Crossword — AR</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font-family:Arial,Helvetica,sans-serif}
+/* ---------- Landing page ---------- */
+#landing{
+  position:fixed;inset:0;z-index:50;
+  display:flex;justify-content:center;
+  background:#000;color:#fff;
+  overflow:hidden;
+  padding:clamp(32px,6vh,72px) 22px calc(32px + env(safe-area-inset-bottom));
+}
+#landingCopy{
+  width:min(100%,780px);height:100%;
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+}
+.landingTitle{
+  margin:0;
+  font-family:Georgia,'Times New Roman',serif;font-weight:400;
+  font-size:clamp(36px,5.5vw,62px);line-height:1;
+  letter-spacing:-.03em;
+}
+#landingImageWrap{
+  width:min(78vw,400px);
+  margin-top:clamp(28px,5vh,56px);
+  flex:0 0 auto;
+}
+#landingImage{
+  display:block;width:100%;height:auto;
+}
+.landingInstruction{
+  margin:clamp(30px,5vh,50px) auto 0;
+  max-width:600px;
+  font-family:Georgia,'Times New Roman',serif;font-weight:400;
+  font-size:clamp(18px,2.4vw,25px);
+  line-height:1.25;
+  letter-spacing:-.01em;
+}
+#enterAR{
+  appearance:none;
+  border:1px solid rgba(255,255,255,.8);
+  background:transparent;color:#fff;
+  min-width:150px;
+  padding:14px 28px;
+  margin-top:clamp(26px,4vh,40px);
+  font:400 12px/1 Arial,Helvetica,sans-serif;
+  letter-spacing:.22em;text-transform:uppercase;
+  cursor:pointer;
+  transition:background .2s ease,color .2s ease,transform .15s ease;
+}
+#enterAR:hover{background:#fff;color:#000}
+#enterAR:active{transform:translateY(1px)}
+#enterAR:disabled{opacity:.6;cursor:wait}
+@media (max-width:760px){
+  #landing{padding-left:18px;padding-right:18px}
+  #landingImageWrap{width:min(76vw,340px);margin-top:25px}
+  .landingInstruction{margin-top:27px;font-size:20px;max-width:360px}
+  #enterAR{margin-top:25px}
+}
+/* MindAR controls the camera-video geometry. Do not force width/height/object-fit here. */
+video.mindar-video,video[autoplay]{z-index:0!important;pointer-events:none!important}
+a-scene{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;z-index:1!important}
+canvas.a-canvas{background:transparent!important;pointer-events:none!important}
+#start{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:#111;color:#fff;text-align:center;padding:28px;box-sizing:border-box}
+#start .box{max-width:340px}button{border:0;background:#fff;color:#111;padding:15px 24px;font-size:16px;margin-top:14px;cursor:pointer}button:disabled{opacity:.6}
+#status{position:fixed;left:0;right:0;bottom:18px;z-index:15;color:#fff;text-align:center;font:14px Arial;text-shadow:0 1px 5px #000;pointer-events:none}
+#debug{display:none;position:fixed;top:12px;left:12px;right:12px;z-index:30;background:rgba(0,0,0,.78);color:#fff;padding:12px;font:12px Arial;border-radius:6px;box-sizing:border-box}
+#debug input{width:100%}body.debug #debug{display:block}
+</style>
+</head>
+<body>
+<section id="landing" aria-label="A Widow’s Son AR landing page">
+  <div id="landingCopy">
+    <h1 class="landingTitle">A Widow’s Son</h1>
+    <div id="landingImageWrap">
+      <img id="landingImage" src="./assets/landing.png" alt="Artwork from A Widow’s Son">
+    </div>
+    <p class="landingInstruction">Point your camera at the artwork to reveal what is hidden.</p>
+    <button id="enterAR">Enter</button>
+  </div>
+</section>
+
+<div id="start"><div class="box"><div style="font-size:22px;margin-bottom:10px">Camera access</div><div>Allow camera access, then point your phone at one of the physical works.</div><button id="startButton">START CAMERA</button></div></div>
+<div id="status">Ready.</div>
+<div id="debug"><div id="debugName">No target</div><div style="margin-top:5px;opacity:.8">White square = exact AR target boundary.</div><label style="display:block;margin-top:9px">Overlay opacity <input id="opacity" type="range" min="0" max="1" step="0.01" value="1"></label></div>
+
+<a-scene id="scene" embedded
+ mindar-image="imageTargetSrc:./targets/targets.mind;autoStart:false;uiLoading:no;uiError:no;uiScanning:no;maxTrack:1;warmupTolerance:8;missTolerance:8;filterMinCF:0.001;filterBeta:1000;"
+ renderer="alpha:true;antialias:true;colorManagement:true"
+ vr-mode-ui="enabled:false" device-orientation-permission-ui="enabled:false">
+ <a-assets>
+  <img id="sol01" src="./assets/solutions/work-01-solution.png">
+  <img id="sol02" src="./assets/solutions/work-02-solution.png">
+  <img id="sol03" src="./assets/solutions/work-03-solution.png">
+  <img id="sol04" src="./assets/solutions/work-04-solution.png">
+  <img id="sol05" src="./assets/solutions/work-05-solution.png">
+  <img id="sol06" src="./assets/solutions/work-06-solution.png">
+  <img id="sol07" src="./assets/solutions/work-07-solution.png">
+  <img id="sol08" src="./assets/solutions/work-08-solution.png">
+ </a-assets>
+ <a-camera position="0 0 0" look-controls="enabled:false"></a-camera>
+
+ <!-- The supplied targets.mind is reverse-ordered: 0→08, 1→07, ... 7→01. -->
+ <a-entity class="target" data-index="0" data-work="08" mindar-image-target="targetIndex:0">
+  <a-plane class="solution" src="#sol08" width="1" height="1" position="0 0 0" rotation="0 0 0" material="shader:flat;transparent:true;alphaTest:0.01;depthWrite:false;opacity:1"></a-plane>
+  <a-plane class="debug-border" width="1" height="1" position="0 0 0.001" material="shader:flat;wireframe:true;wireframeLinewidth:2;color:#ffffff;transparent:true;opacity:0"></a-plane>
+ </a-entity>
+ <a-entity class="target" data-index="1" data-work="07" mindar-image-target="targetIndex:1">
+  <a-plane class="solution" src="#sol07" width="1" height="1" position="0 0 0" rotation="0 0 0" material="shader:flat;transparent:true;alphaTest:0.01;depthWrite:false;opacity:1"></a-plane>
+  <a-plane class="debug-border" width="1" height="1" position="0 0 0.001" material="shader:flat;wireframe:true;wireframeLinewidth:2;color:#ffffff;transparent:true;opacity:0"></a-plane>
+ </a-entity>
+ <a-entity class="target" data-index="2" data-work="06" mindar-image-target="targetIndex:2">
+  <a-plane class="solution" src="#sol06" width="1" height="1" position="0 0 0" rotation="0 0 0" material="shader:flat;transparent:true;alphaTest:0.01;depthWrite:false;opacity:1"></a-plane>
+  <a-plane class="debug-border" width="1" height="1" position="0 0 0.001" material="shader:flat;wireframe:true;wireframeLinewidth:2;color:#ffffff;transparent:true;opacity:0"></a-plane>
+ </a-entity>
+ <a-entity class="target" data-index="3" data-work="05" mindar-image-target="targetIndex:3">
+  <a-plane class="solution" src="#sol05" width="1" height="1" position="0 0 0" rotation="0 0 0" material="shader:flat;transparent:true;alphaTest:0.01;depthWrite:false;opacity:1"></a-plane>
+  <a-plane class="debug-border" width="1" height="1" position="0 0 0.001" material="shader:flat;wireframe:true;wireframeLinewidth:2;color:#ffffff;transparent:true;opacity:0"></a-plane>
+ </a-entity>
+ <a-entity class="target" data-index="4" data-work="04" mindar-image-target="targetIndex:4">
+  <a-plane class="solution" src="#sol04" width="1" height="1" position="0 0 0" rotation="0 0 0" material="shader:flat;transparent:true;alphaTest:0.01;depthWrite:false;opacity:1"></a-plane>
+  <a-plane class="debug-border" width="1" height="1" position="0 0 0.001" material="shader:flat;wireframe:true;wireframeLinewidth:2;color:#ffffff;transparent:true;opacity:0"></a-plane>
+ </a-entity>
+ <a-entity class="target" data-index="5" data-work="03" mindar-image-target="targetIndex:5">
+  <a-plane class="solution" src="#sol03" width="1" height="1" position="0 0 0" rotation="0 0 0" material="shader:flat;transparent:true;alphaTest:0.01;depthWrite:false;opacity:1"></a-plane>
+  <a-plane class="debug-border" width="1" height="1" position="0 0 0.001" material="shader:flat;wireframe:true;wireframeLinewidth:2;color:#ffffff;transparent:true;opacity:0"></a-plane>
+ </a-entity>
+ <a-entity class="target" data-index="6" data-work="02" mindar-image-target="targetIndex:6">
+  <a-plane class="solution" src="#sol02" width="1" height="1" position="0 0 0" rotation="0 0 0" material="shader:flat;transparent:true;alphaTest:0.01;depthWrite:false;opacity:1"></a-plane>
+  <a-plane class="debug-border" width="1" height="1" position="0 0 0.001" material="shader:flat;wireframe:true;wireframeLinewidth:2;color:#ffffff;transparent:true;opacity:0"></a-plane>
+ </a-entity>
+ <a-entity class="target" data-index="7" data-work="01" mindar-image-target="targetIndex:7">
+  <a-plane class="solution" src="#sol01" width="1" height="1" position="0 0 0" rotation="0 0 0" material="shader:flat;transparent:true;alphaTest:0.01;depthWrite:false;opacity:1"></a-plane>
+  <a-plane class="debug-border" width="1" height="1" position="0 0 0.001" material="shader:flat;wireframe:true;wireframeLinewidth:2;color:#ffffff;transparent:true;opacity:0"></a-plane>
+ </a-entity>
+</a-scene>
+
+<script>
+const scene=document.querySelector('#scene');
+const landing=document.querySelector('#landing');
+const enterAR=document.querySelector('#enterAR');
+const start=document.querySelector('#start');
+const button=document.querySelector('#startButton');
+const status=document.querySelector('#status');
+const debugName=document.querySelector('#debugName');
+const opacity=document.querySelector('#opacity');
+const targets=[...document.querySelectorAll('.target')];
+const targetToWork=[8,7,6,5,4,3,2,1];
+const debugMode=new URLSearchParams(location.search).get('debug')==='1';
+if(debugMode)document.body.classList.add('debug');
+let activeIndex=-1;
+
+function hideAllTargets(){targets.forEach(el=>{el.object3D.visible=false;});}
+function showTarget(i){
+  targets.forEach((el,idx)=>{el.object3D.visible=idx===i;});
+  activeIndex=i;
+  const work=targetToWork[i];
+  debugName.textContent='MINDAR TARGET '+i+' → WORK '+String(work).padStart(2,'0')+' → SOLUTION '+String(work).padStart(2,'0');
+  status.textContent='Artwork found — solution aligned.';
+}
+function hideTarget(i){
+  if(activeIndex!==i)return;
+  targets[i].object3D.visible=false;
+  activeIndex=-1;
+  debugName.textContent='No target';
+  status.textContent='Point the camera at a physical work.';
+}
+
+targets.forEach((el,i)=>{
+  el.addEventListener('targetFound',()=>showTarget(i));
+  el.addEventListener('targetLost',()=>hideTarget(i));
+});
+
+scene.addEventListener('loaded',()=>{hideAllTargets();status.textContent='Ready — tap START CAMERA.';});
+scene.addEventListener('arReady',()=>{start.style.display='none';status.textContent='Camera active — point at a physical work.';});
+
+opacity.addEventListener('input',()=>{
+  targets.forEach(el=>{
+    const plane=el.querySelector('.solution');
+    if(plane)plane.setAttribute('material','shader:flat;transparent:true;alphaTest:0.01;depthWrite:false;opacity:'+opacity.value);
+  });
+});
+
+enterAR.addEventListener('click',()=>{
+  landing.style.display='none';
+  start.style.display='flex';
+});
+
+button.addEventListener('click',async()=>{
+  try{
+    button.disabled=true;button.textContent='STARTING…';
+    await scene.systems['mindar-image-system'].start();
+    start.style.display='none';
+    status.textContent='Camera active — point at a physical work.';
+  }catch(e){
+    console.error(e);
+    button.disabled=false;button.textContent='TRY AGAIN';
+    start.style.display='none';
+    landing.style.display='flex';
+    status.textContent='Camera could not start — check permission.';
+  }
+});
+</script>
+</body>
+</html>
