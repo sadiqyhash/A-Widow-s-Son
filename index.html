@@ -139,7 +139,6 @@ body.debug #debug{display:block}
   <div style="margin-top:5px;opacity:.8">White square = exact 1:1 AR target boundary.</div>
   <label>Letter opacity <input id="opacity" type="range" min="0" max="1" step="0.01" value="1"></label>
   <label style="display:flex;align-items:center;gap:8px"><input id="referenceToggle" type="checkbox"> Show reference artwork</label>
-  <label style="display:flex;align-items:center;gap:8px"><input id="revealToggle" type="checkbox" checked> Animate reveal</label>
 </div>
 
 <script>
@@ -152,7 +151,6 @@ const status=document.querySelector('#status');
 const debugName=document.querySelector('#debugName');
 const opacityControl=document.querySelector('#opacity');
 const referenceToggle=document.querySelector('#referenceToggle');
-const revealToggle=document.querySelector('#revealToggle');
 const targets=[...document.querySelectorAll('.target')];
 const targetToWork=[8,7,6,5,4,3,2,1];
 const debugMode=new URLSearchParams(location.search).get('debug')==='1';
@@ -184,6 +182,9 @@ function setupPlanes(){
       canvas.width=4500; canvas.height=4500;
       const texture=new THREE.CanvasTexture(canvas);
       texture.colorSpace=THREE.SRGBColorSpace;
+      texture.minFilter=THREE.LinearFilter;
+      texture.magFilter=THREE.LinearFilter;
+      texture.generateMipmaps=false;
       texture.needsUpdate=true;
       mesh.material.map=texture;
       mesh.material.transparent=true;
@@ -220,55 +221,47 @@ function drawCells(el, upto){
   r.texture.needsUpdate=true;
 }
 
-function stopReveal(el, clear=true){
+function clearReveal(el){
   const r=el._reveal;
   if(!r)return;
   if(r.timer)cancelAnimationFrame(r.timer);
   r.timer=null;
   r.startTime=0;
-  if(clear){r.revealed=0;drawCells(el,0);}
+  r.revealed=0;
+  drawCells(el,0);
 }
 
-function animateReveal(el){
+function revealAll(el){
   const r=el._reveal;
-  if(!r||!r.found)return;
-  if(!revealToggle.checked){drawCells(el,r.cells.length);r.revealed=r.cells.length;return;}
-  stopReveal(el,true);
-  const introDelay=280;
-  const stepMs=42;
-  const total=r.cells.length;
-  const startAt=performance.now()+introDelay;
-  r.startTime=startAt;
-  const tick=(now)=>{
-    if(!r.found)return;
-    if(now<startAt){r.timer=requestAnimationFrame(tick);return;}
-    const next=Math.min(total,Math.floor((now-startAt)/stepMs)+1);
-    if(next!==r.revealed){r.revealed=next;drawCells(el,next)}
-    if(next<total){r.timer=requestAnimationFrame(tick);}
-    else{r.timer=null;status.textContent='The hidden words are complete.';}
-  };
-  r.timer=requestAnimationFrame(tick);
-  status.textContent='Revealing…';
+  if(!r)return;
+  if(r.timer)cancelAnimationFrame(r.timer);
+  r.timer=null;
+  r.startTime=0;
+  r.revealed=r.cells.length;
+  drawCells(el,r.cells.length);
 }
 
 function showTarget(i){
   targets.forEach((el,idx)=>{
     const same=idx===i;
     el.object3D.visible=same;
-    if(!same&&el._reveal){el._reveal.found=false;stopReveal(el,true);}
+    if(!same&&el._reveal){el._reveal.found=false;clearReveal(el);}
   });
   activeIndex=i;
   const work=targetToWork[i];
   const r=targets[i]._reveal;
-  if(r){r.found=true;animateReveal(targets[i]);}
+  if(r){
+    r.found=true;
+    revealAll(targets[i]);
+  }
   debugName.textContent='MINDAR TARGET '+i+' → WORK '+String(work).padStart(2,'0')+' → LETTERS '+String(work).padStart(2,'0');
-  if(!revealToggle.checked)status.textContent='Artwork found — letters revealed.';
+  status.textContent='Artwork found — hidden words revealed.';
 }
 
 function hideTarget(i){
   if(activeIndex!==i)return;
   const r=targets[i]._reveal;
-  if(r){r.found=false;stopReveal(targets[i],true);}
+  if(r){r.found=false;}
   targets[i].object3D.visible=false;
   activeIndex=-1;
   debugName.textContent='No target';
@@ -317,11 +310,7 @@ referenceToggle.addEventListener('change',()=>{
   });
 });
 
-revealToggle.addEventListener('change',()=>{
-  if(activeIndex<0)return;
-  const el=targets[activeIndex];
-  if(el._reveal)animateReveal(el);
-});
+
 
 enterAR.addEventListener('click',()=>{
   landing.style.display='none';
