@@ -12,11 +12,13 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;color:
 /* ---------- Landing page ---------- */
 #landing{
   position:fixed;inset:0;z-index:50;display:flex;justify-content:center;
+  transition:opacity .45s ease;
   background:#000;color:#fff;overflow:hidden;
   padding:clamp(32px,6vh,72px) 22px calc(32px + env(safe-area-inset-bottom));
   box-sizing:border-box;
 }
 #landingCopy{width:min(100%,780px);height:100%;display:flex;flex-direction:column;align-items:center;text-align:center}
+#landing.is-exiting{opacity:0;pointer-events:none}
 .landingTitle{margin:0;font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:clamp(36px,5.5vw,62px);line-height:1;letter-spacing:-.03em}
 #landingImageWrap{width:min(78vw,400px);margin-top:clamp(28px,5vh,56px);flex:0 0 auto}
 #landingImage{display:block;width:100%;height:auto}
@@ -35,12 +37,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;color:
 #arStage video{position:absolute!important;pointer-events:none!important;z-index:0!important}
 #scene{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;z-index:1!important}
 canvas.a-canvas{background:transparent!important;pointer-events:none!important}
-
-#start{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:#111;color:#fff;text-align:center;padding:28px;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
-#start .box{max-width:340px}
-#startButton{border:0;background:#fff;color:#111;padding:15px 24px;font-size:16px;margin-top:14px;cursor:pointer}
-#startButton:disabled{opacity:.6}
-#status{position:fixed;left:0;right:0;bottom:18px;z-index:15;color:#fff;text-align:center;font:14px Arial,sans-serif;text-shadow:0 1px 5px #000;pointer-events:none}
+#status{position:fixed;left:0;right:0;bottom:18px;z-index:15;color:#fff;text-align:center;font:14px Arial,sans-serif;text-shadow:0 1px 5px #000;pointer-events:none;opacity:0;transition:opacity .35s ease}
+#status.is-visible{opacity:1}
 
 #debug{display:none;position:fixed;top:12px;left:12px;right:12px;z-index:30;background:rgba(0,0,0,.80);color:#fff;padding:12px;font:12px Arial,sans-serif;border-radius:6px;box-sizing:border-box;backdrop-filter:blur(4px)}
 #debug input[type=range]{width:100%}
@@ -56,7 +54,8 @@ body.debug #debug{display:block}
       <img id="landingImage" src="./assets/landing.png" alt="Artwork from A Widow’s Son">
     </div>
     <p class="landingInstruction">Point your camera at the artwork to reveal what is hidden.</p>
-    <button id="enterAR">Enter</button>
+    <button id="enterAR" disabled>Enter</button>
+    <div id="cameraError" aria-live="polite" style="display:none;margin-top:14px;font:12px Arial,Helvetica,sans-serif;letter-spacing:.02em;opacity:.75;max-width:320px">Camera access was not available. Please allow camera access and try again.</div>
   </div>
 </section>
 
@@ -132,7 +131,6 @@ body.debug #debug{display:block}
   </a-scene>
 </div>
 
-<div id="start"><div class="box"><div style="font-size:22px;margin-bottom:10px">Camera access</div><div>Allow camera access, then point your phone at one of the physical works.</div><button id="startButton">START CAMERA</button></div></div>
 <div id="status">Ready.</div>
 <div id="debug">
   <div id="debugName">No target</div>
@@ -145,12 +143,11 @@ body.debug #debug{display:block}
 const scene=document.querySelector('#scene');
 const landing=document.querySelector('#landing');
 const enterAR=document.querySelector('#enterAR');
-const start=document.querySelector('#start');
-const button=document.querySelector('#startButton');
 const status=document.querySelector('#status');
 const debugName=document.querySelector('#debugName');
 const opacityControl=document.querySelector('#opacity');
 const referenceToggle=document.querySelector('#referenceToggle');
+const cameraError=document.querySelector('#cameraError');
 const targets=[...document.querySelectorAll('.target')];
 const targetToWork=[8,7,6,5,4,3,2,1];
 const debugMode=new URLSearchParams(location.search).get('debug')==='1';
@@ -255,7 +252,7 @@ function showTarget(i){
     revealAll(targets[i]);
   }
   debugName.textContent='MINDAR TARGET '+i+' → WORK '+String(work).padStart(2,'0')+' → LETTERS '+String(work).padStart(2,'0');
-  status.textContent='Artwork found — hidden words revealed.';
+  status.classList.remove('is-visible');
 }
 
 function hideTarget(i){
@@ -265,7 +262,8 @@ function hideTarget(i){
   targets[i].object3D.visible=false;
   activeIndex=-1;
   debugName.textContent='No target';
-  status.textContent='Point the camera at a physical work.';
+  status.textContent='Point your camera at the artwork.';
+  status.classList.add('is-visible');
 }
 
 targets.forEach((el,i)=>{
@@ -285,12 +283,14 @@ scene.addEventListener('loaded',async()=>{
   });
   assetsReady=true;
   hideAllTargets();
-  status.textContent='Ready — tap START CAMERA.';
+  enterAR.disabled=false;
+  status.textContent='Point your camera at the artwork.';
 });
 
 scene.addEventListener('arReady',()=>{
-  start.style.display='none';
-  status.textContent='Camera active — point at a physical work.';
+  status.textContent='Point your camera at the artwork.';
+  status.classList.add('is-visible');
+  window.setTimeout(()=>status.classList.remove('is-visible'),3200);
 });
 
 opacityControl.addEventListener('input',()=>{
@@ -312,23 +312,22 @@ referenceToggle.addEventListener('change',()=>{
 
 
 
-enterAR.addEventListener('click',()=>{
-  landing.style.display='none';
-  start.style.display='flex';
-});
-
-button.addEventListener('click',async()=>{
+enterAR.addEventListener('click',async()=>{
+  if(!assetsReady)return;
   try{
-    button.disabled=true;button.textContent='STARTING…';
+    enterAR.disabled=true;
+    cameraError.style.display='none';
+    landing.classList.add('is-exiting');
     await scene.systems['mindar-image-system'].start();
-    start.style.display='none';
-    status.textContent='Camera active — point at a physical work.';
+    window.setTimeout(()=>{
+      landing.style.display='none';
+      landing.classList.remove('is-exiting');
+    },450);
   }catch(e){
     console.error(e);
-    button.disabled=false;button.textContent='TRY AGAIN';
-    start.style.display='none';
-    landing.style.display='flex';
-    status.textContent='Camera could not start — check permission.';
+    landing.classList.remove('is-exiting');
+    enterAR.disabled=false;
+    cameraError.style.display='block';
   }
 });
 </script>
